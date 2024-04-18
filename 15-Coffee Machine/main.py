@@ -67,7 +67,6 @@ while is_on:
 
         if is_resource_sufficient(MENU[user_choice]["ingredients"]):
             if is_transaction_successful(user_choice, total) == True:
-                print(f"resources: {resources}")
                 make_coffee(user_choice, MENU[user_choice]["ingredients"])
             else:
                 print("Sorry that's not enough money. Money refunded.")
