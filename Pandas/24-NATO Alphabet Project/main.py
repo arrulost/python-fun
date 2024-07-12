@@ -3,7 +3,7 @@ import pandas
 
 data = pandas.read_csv("Pandas/24-NATO Alphabet Project/nato_phonetic_alphabet.csv")
 new_dict = {row.letter:row.code for index, row in data.iterrows()}
-print(new_dict)
+
 
 def generate_phonetic():
     word = input("Enter a word: ").upper()
