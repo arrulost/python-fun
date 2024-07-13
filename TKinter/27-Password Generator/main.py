@@ -2,7 +2,9 @@ from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
 import pyperclip
+import json
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
+
 def generate_password_func():
     letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -20,18 +22,52 @@ def generate_password_func():
     pyperclip.copy(password)
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save():
-    if len(website_entry.get()) == 0 or len(password_entry.get()) == 0:
+    website_g = website_entry.get()
+    password_g = password_entry.get()
+    email_g = email_entry.get()
+    new_data = {
+        website_g:{
+        "email": email_g,
+        "password": password_g,
+        }
+    }
+    if len(website_g) == 0 or len(password_g) == 0:
         messagebox.showwarning(title="Oops", message="Please don't leave any fields empty!")
     else:
-        is_ok = messagebox.askokcancel(title=website_entry.get(), message=f"These are the details enteres: \nEmail:{email_entry.get()} \nPassword:{password_entry.get()} \n Is it ok to save?")
-        if is_ok:
-            with open("TKinter/27-Password Generator/data.txt", mode="a") as data:
-                data.write(f"{website_entry.get()}|{email_entry.get()}|{password_entry.get()}\n")
+        try:
+            with open("TKinter/27-Password Generator/data.json", mode="r") as data_file:
+                data = json.load(data_file)
+        except FileNotFoundError:
+            with open("TKinter/27-Password Generator/data.json", mode="w") as data_file:
+                json.dump(new_data, data_file, indent=4)
+        else:
+            data.update(new_data)
+            with open("TKinter/27-Password Generator/data.json", mode="w") as data_file:
+                json.dump(data, data_file, indent=4)
+        finally:
             website_entry.delete(0,END)
-            website_entry.insert(0, "")
             password_entry.delete(0,END)
-            password_entry.insert(0, "")
             website_entry.focus()
+
+# ---------------------------- FIND PASSWORD ------------------------------- #
+
+def find_password():
+    website_g = website_entry.get()
+    try:
+        with open("TKinter/27-Password Generator/data.json", mode="r") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showwarning(title="Not Found", message="No data file found.")
+    else:
+        if website_g in data:
+            email = data[website_g]['email']
+            password = data[website_g]['password']
+            messagebox.showinfo(title=website_g, message=f"Email: {email}\nPassword: {password}")
+        else:
+            messagebox.showerror(title="Not Found", message=f"No details for {website_g} found.")
+    
+
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 window =Tk()
@@ -46,9 +82,12 @@ canvas.grid(column=1, row=0)
 website = Label(text="Website:")
 website.grid(column=0,row=1)
 
-website_entry = Entry(width=52)
-website_entry.grid(column=1,row=1,columnspan=2)
+website_entry = Entry(width=33)
+website_entry.grid(column=1,row=1)
 website_entry.focus()
+
+search = Button(text="Search", width=14, command=find_password)
+search.grid(column=2, row=1)
 
 email = Label(text="Email/Username:")
 email.grid(column=0,row=2)
